@@ -12,16 +12,16 @@
       (system:
         let
           pkgs = import nixpkgs { system = "${system}"; config.allowUnfree = true; };
-          full = true; # Include all tools
+          full = false; # Include all tools
           recon = true; # Relevant tools for reconnaissance
-          scan = false; # Relevant tools for scanning for vulnerabilities
+          sniffing = true;
+          scan = true; # Relevant tools for scanning for vulnerabilities
           exploit = false; # Relevant tools for exploitation phase
           exdev = true; # Relevant tools for exploit development
           reverse = false; # Relevant tools for reverse engineering
 
           pythonDeps = builtins.concatLists [
             (if recon || full then [
-              pkgs.python3Packages.pypcap
               pkgs.python3Packages.scapy
             ] else [ ])
             (if exdev || full then [
@@ -49,6 +49,18 @@
               pkgs.urlhunter
               pkgs.dnsrecon
               pkgs.maltego
+              pkgs.wireshark-qt
+              pkgs.arp-scan
+              pkgs.dnsenum
+              pkgs.hping
+              pkgs.smbmap
+              pkgs.testssl
+            ] else [ ])
+            (if sniffing || full then [
+              (pkgs.python3.withPackages (p: pythonDeps))
+              pkgs.bettercap
+              pkgs.mitmproxy
+              pkgs.dsniff
             ] else [ ])
             (if scan || full then [
               (pkgs.python3.withPackages (p: pythonDeps))
@@ -64,6 +76,7 @@
               pkgs.thc-hydra
               pkgs.bloodhound
               pkgs.powersploit
+              pkgs.msfpc
             ] else [ ])
             (if exdev || full then [
               (pkgs.python3.withPackages (p: pythonDeps))
